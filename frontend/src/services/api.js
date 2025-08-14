@@ -26,3 +26,35 @@ export const deleteMemory = async (id) => {
   await api.delete(`/memories/${id}`);
 };
 
+// Graph API endpoints
+export const getMemoryGraph = async (timeRange = 'month', minStrength = 0.3) => {
+  const response = await api.get('/api/graph/memories/graph', {
+    params: { time_range: timeRange, min_strength: minStrength }
+  });
+  return response.data;
+};
+
+export const analyzeRelationships = async (forceRefresh = false) => {
+  const response = await api.post('/api/graph/memories/analyze-relationships', null, {
+    params: { force_refresh: forceRefresh }
+  });
+  return response.data;
+};
+
+export const detectClusters = async () => {
+  const response = await api.post('/api/graph/memories/detect-clusters');
+  return response.data;
+};
+
+export const createManualRelationship = async (sourceId, targetId, type = 'manual', strength = 0.8) => {
+  const response = await api.post(`/api/graph/memories/${sourceId}/relate/${targetId}`, null, {
+    params: { relationship_type: type, strength }
+  });
+  return response.data;
+};
+
+export const findMemoryPath = async (sourceId, targetId) => {
+  const response = await api.get(`/api/graph/memories/${sourceId}/path/${targetId}`);
+  return response.data;
+};
+

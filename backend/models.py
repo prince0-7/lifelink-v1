@@ -157,3 +157,116 @@ class User(Document):
     
     class Settings:
         name = "users"
+
+# New models for roadmap features
+
+class MemoryRelationship(Document):
+    """Relationships between memories"""
+    source_memory_id: str
+    target_memory_id: str
+    user_id: str
+    relationship_type: str  # semantic, temporal, entity_based, manual
+    strength: float  # 0.0 to 1.0
+    reasons: List[str]
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    class Settings:
+        name = "memory_relationships"
+        indexes = [
+            [("user_id", 1), ("source_memory_id", 1)],
+            [("user_id", 1), ("target_memory_id", 1)],
+            [("strength", -1)]
+        ]
+
+class UserSubscription(Document):
+    """User subscription details"""
+    user_id: str
+    plan: str  # free, premium, family, enterprise
+    stripe_customer_id: Optional[str]
+    stripe_subscription_id: Optional[str]
+    status: str  # active, cancelled, past_due
+    current_period_end: datetime
+    memory_count: int = 0
+    storage_used: int = 0  # in bytes
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    class Settings:
+        name = "user_subscriptions"
+        indexes = [
+            [("user_id", 1)],
+            [("status", 1)],
+            [("plan", 1)]
+        ]
+
+class MemoryCluster(Document):
+    """AI-detected memory clusters/themes"""
+    user_id: str
+    cluster_name: str
+    theme: str  # Work, Travel, Friends, Family, Health, etc.
+    memory_ids: List[str]
+    keywords: List[str]
+    summary: Optional[str]
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    class Settings:
+        name = "memory_clusters"
+        indexes = [
+            [("user_id", 1)],
+            [("theme", 1)]
+        ]
+
+class SharedMemoryAccess(Document):
+    """Shared memory access control"""
+    memory_id: str
+    owner_id: str
+    shared_with_user_id: str
+    access_level: str  # view, edit, admin
+    shared_at: datetime = Field(default_factory=datetime.utcnow)
+    expires_at: Optional[datetime] = None
+    
+    class Settings:
+        name = "shared_memory_access"
+        indexes = [
+            [("memory_id", 1)],
+            [("owner_id", 1)],
+            [("shared_with_user_id", 1)]
+        ]
+
+class AnalyticsEvent(Document):
+    """User analytics events"""
+    user_id: str
+    event_type: str  # memory_created, memory_viewed, ai_interaction, etc.
+    event_data: Dict[str, Any]
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    
+    class Settings:
+        name = "analytics_events"
+        indexes = [
+            [("user_id", 1), ("timestamp", -1)],
+            [("event_type", 1)]
+        ]
+
+# Request/Response models for new features
+
+class GraphRequest(BaseModel):
+    """Request for memory graph data"""
+    time_range: str = "all"  # all, year, month, week
+    min_strength: float = 0.3
+    include_clusters: bool = True
+
+class GraphResponse(BaseModel):
+    """Response with memory graph data"""
+    nodes: List[Dict[str, Any]]
+    edges: List[Dict[str, Any]]
+    clusters: Optional[List[Dict[str, Any]]]
+    stats: Dict[str, Any]
+
+class SubscriptionPlan(BaseModel):
+    """Subscription plan details"""
+    name: str
+    price: float
+    memory_limit: Optional[int]
+    storage_limit: int  # in GB
+    features: List[str]

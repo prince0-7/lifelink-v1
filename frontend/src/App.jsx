@@ -6,6 +6,7 @@ import MemoryTimeline from './components/MemoryTimeline';
 import MemoryInsights from './components/MemoryInsights';
 import AdvancedSearch from './components/AdvancedSearch';
 import AISettings from './components/AISettings';
+import MemoryGraphView from './components/MemoryGraphView';
 import AIManager from './ai/AIManager';
 import { getMemories, createMemory, deleteMemory } from './services/api';
 
@@ -34,6 +35,7 @@ function App() {
   const [showInsights, setShowInsights] = useState(false);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [showAISettings, setShowAISettings] = useState(false);
+  const [showMemoryGraph, setShowMemoryGraph] = useState(false);
   const [aiGenerating, setAIGenerating] = useState(false);
   const [aiStatus, setAIStatus] = useState({ source: 'none', cost: 0 });
 
@@ -317,6 +319,13 @@ function App() {
           🤖 AI Settings
         </button>
 
+        <button
+          onClick={() => setShowMemoryGraph(!showMemoryGraph)}
+          style={controlButtonStyle(darkMode, showMemoryGraph)}
+        >
+          🕸️ Graph
+        </button>
+
         {memories.length > 5 && (
           <button
             onClick={handleAnalyzeMemories}
@@ -448,6 +457,10 @@ function App() {
             console.log('Selected memory:', memory);
           }}
         />
+      )}
+
+      {showMemoryGraph && (
+        <MemoryGraphView />
       )}
 
       {showInsights && (

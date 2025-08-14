@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
 from config import settings
-from models import Memory, MemoryInsight, MemoryCreate, MemoryUpdate, MemoryResponse, SearchQuery, AIResponse, AnalysisResponse, User
+from models import Memory, MemoryInsight, MemoryCreate, MemoryUpdate, MemoryResponse, SearchQuery, AIResponse, AnalysisResponse, User, MemoryRelationship, MemoryCluster, UserSubscription, SharedMemoryAccess, AnalyticsEvent
 from services.ai_service_simple import ai_service
 from services.websocket_manager import sio, ws_manager
 from services.vector_service import vector_service
@@ -17,6 +17,7 @@ import aiofiles
 from pathlib import Path
 import socketio
 from tasks.ai_tasks import generate_memory_embeddings, analyze_memory_sentiment
+from routers import auth, graph
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -43,8 +44,15 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
-    # Initialize Beanie with the Memory, MemoryInsight, and User document models
-    await init_beanie(database=database, document_models=[Memory, MemoryInsight, User])
+    # Initialize Beanie with all document models
+    await init_beanie(
+        database=database, 
+        document_models=[
+            Memory, MemoryInsight, User, MemoryRelationship, 
+            MemoryCluster, UserSubscription, SharedMemoryAccess, 
+            AnalyticsEvent
+        ]
+    )
     logger.info("Lifelink API has started.")
     
     # Check AI availability
@@ -57,6 +65,10 @@ async def startup_event():
     # Add GraphQL endpoint
     graphql_router = create_graphql_router()
     app.include_router(graphql_router, prefix="/graphql")
+    
+    # Add routers
+    app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
+    app.include_router(graph.router, prefix="/api/graph", tags=["graph"])
 
 @app.on_event("shutdown")
 async def shutdown_event():

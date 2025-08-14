@@ -1,0 +1,81 @@
+# FastAPI and Server
+fastapi==0.110.0
+uvicorn[standard]==0.27.1
+python-multipart==0.0.9
+
+# Database
+motor==3.3.2  # Async MongoDB driver
+pymongo==4.6.1
+beanie==1.25.0  # MongoDB ODM
+
+# AI and ML
+openai-whisper==20231117  # For audio transcription
+transformers==4.37.2  # For embeddings
+torch==2.2.0  # Required for transformers
+sentence-transformers==2.3.1  # For semantic search
+langchain==0.1.6
+langchain-community==0.0.19
+chromadb==0.4.22  # Vector database
+
+# Audio Processing
+pydub==0.25.1
+ffmpeg-python==0.2.0
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-decouple==3.8
+
+# Utils
+python-dotenv==1.0.1
+pydantic==2.5.3
+pydantic-settings==2.1.0
+aiofiles==23.2.1
+pandas==2.2.0
+numpy==1.26.3
+
+# CORS and API
+httpx==0.26.0
+
+# Optional: For cloud AI integration
+google-generativeai==0.3.2  # For Gemini
+anthropic==0.18.1  # For Claude (if needed)
+
+# GraphQL
+strawberry-graphql[fastapi]==0.217.1
+
+# WebSockets
+python-socketio[asyncio_client]==5.11.0
+
+# Background Tasks
+celery[redis]==5.3.4
+redis==5.0.1
+
+# Enhanced AI & Vector Search
+langchain==0.1.6
+langchain-community==0.0.19
+langchain-openai==0.0.5
+pinecone-client==3.0.2  # For vector database
+openai>=1.0.0  # For GPT-4o
+
+# NLP
+spacy==3.7.2
+nltk==3.8.1
+
+# Cloud Storage
+cloudinary==1.38.0
+boto3==1.34.25  # For AWS S3
+
+# Media Processing
+moviepy==1.0.3
+
+# Search
+elasticsearch[async]==8.12.0
+
+# Authentication & Security
+authlib==1.3.0
+cryptography==42.0.2
+
+# Analytics
+pandas==2.2.0
+plotly==5.18.0

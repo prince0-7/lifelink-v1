@@ -1,0 +1,18 @@
+# Core FastAPI requirements
+fastapi==0.110.0
+uvicorn[standard]==0.27.1
+python-multipart==0.0.9
+
+# Database
+motor==3.3.2
+beanie==1.25.0
+
+# Utils
+python-dotenv==1.0.1
+pydantic==2.5.3
+pydantic-settings==2.1.0
+aiofiles==23.2.1
+
+# CORS and API
+httpx==0.26.0
+numpy==1.26.3

@@ -17,7 +17,7 @@ import aiofiles
 from pathlib import Path
 import socketio
 from tasks.ai_tasks import generate_memory_embeddings, analyze_memory_sentiment
-from routers import auth, graph
+from routers import auth, graph, analytics
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -69,6 +69,7 @@ async def startup_event():
     # Add routers
     app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
     app.include_router(graph.router, prefix="/api/graph", tags=["graph"])
+    app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 
 @app.on_event("shutdown")
 async def shutdown_event():

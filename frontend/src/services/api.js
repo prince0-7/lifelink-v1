@@ -58,3 +58,64 @@ export const findMemoryPath = async (sourceId, targetId) => {
   return response.data;
 };
 
+// Analytics API endpoints
+export const getAnalytics = {
+  getMoodTrends: async (period = 'month') => {
+    const response = await api.get('/api/analytics/mood-trends', {
+      params: { period }
+    });
+    return response.data;
+  },
+
+  getConsistency: async (days = 30) => {
+    const response = await api.get('/api/analytics/consistency', {
+      params: { days }
+    });
+    return response.data;
+  },
+
+  getPeakTimes: async () => {
+    const response = await api.get('/api/analytics/peak-times');
+    return response.data;
+  },
+
+  getKeywords: async (limit = 20) => {
+    const response = await api.get('/api/analytics/keywords', {
+      params: { limit }
+    });
+    return response.data;
+  },
+
+  getMemoryLength: async () => {
+    const response = await api.get('/api/analytics/memory-length');
+    return response.data;
+  },
+
+  getEmotionalJourney: async (days = 30) => {
+    const response = await api.get('/api/analytics/emotional-journey', {
+      params: { days }
+    });
+    return response.data;
+  },
+
+  getInsightsSummary: async () => {
+    const response = await api.get('/api/analytics/insights-summary');
+    return response.data;
+  },
+
+  getActivityHeatmap: async (year) => {
+    const response = await api.get('/api/analytics/activity-heatmap', {
+      params: { year }
+    });
+    return response.data;
+  },
+
+  trackEvent: async (eventType, eventData = {}) => {
+    const response = await api.post('/api/analytics/track-event', {
+      event_type: eventType,
+      event_data: eventData
+    });
+    return response.data;
+  }
+};
+

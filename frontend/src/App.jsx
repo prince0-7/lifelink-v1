@@ -3,7 +3,7 @@ import './App.css';
 import MemoryCard from './components/MemoryCard';
 import MoodChart from './components/MoodChart';
 import MemoryTimeline from './components/MemoryTimeline';
-import MemoryInsights from './components/MemoryInsights';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
 import AdvancedSearch from './components/AdvancedSearch';
 import AISettings from './components/AISettings';
 import MemoryGraphView from './components/MemoryGraphView';
@@ -464,8 +464,7 @@ function App() {
       )}
 
       {showInsights && (
-        <MemoryInsights 
-          memories={memories} 
+        <AnalyticsDashboard 
           darkMode={darkMode}
         />
       )}

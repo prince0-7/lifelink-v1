@@ -12,7 +12,7 @@ set PYTHON=python
 if exist ".venv\Scripts\python.exe" set PYTHON=.venv\Scripts\python.exe
 
 echo Checking MongoDB connection...
-%PYTHON% -c "from test_backend import test_mongodb; import asyncio; raise SystemExit(0 if asyncio.run(test_mongodb()) else 1)" >nul 2>&1
+%PYTHON% -c "from test_backend import check_mongodb; import asyncio; raise SystemExit(0 if asyncio.run(check_mongodb()) else 1)" >nul 2>&1
 if errorlevel 1 (
     echo MongoDB is not running! Please start MongoDB first.
     echo You can start MongoDB with: mongod

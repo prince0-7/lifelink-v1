@@ -4,7 +4,7 @@ import httpx
 from motor.motor_asyncio import AsyncIOMotorClient
 
 
-async def test_mongodb():
+async def check_mongodb():
     """Test MongoDB connection."""
     try:
         client = AsyncIOMotorClient(
@@ -19,7 +19,7 @@ async def test_mongodb():
         return False
 
 
-async def test_api():
+async def check_api():
     """Test API endpoints."""
     try:
         async with httpx.AsyncClient() as client:
@@ -61,8 +61,8 @@ async def test_api():
 async def main():
     print("Testing Lifelink Backend...\n")
 
-    await test_mongodb()
-    await test_api()
+    await check_mongodb()
+    await check_api()
 
     print("\nTest complete!")
 

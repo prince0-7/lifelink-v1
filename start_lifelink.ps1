@@ -28,7 +28,7 @@ if (-not (Test-Path $BackendPython)) {
 
 Write-Host "Checking MongoDB connection..." -ForegroundColor Yellow
 Push-Location $Backend
-& $BackendPython -c "from test_backend import test_mongodb; import asyncio; raise SystemExit(0 if asyncio.run(test_mongodb()) else 1)"
+& $BackendPython -c "from test_backend import check_mongodb; import asyncio; raise SystemExit(0 if asyncio.run(check_mongodb()) else 1)"
 if ($LASTEXITCODE -ne 0) {
     Pop-Location
     Write-Host "MongoDB is not reachable on localhost:27017." -ForegroundColor Red

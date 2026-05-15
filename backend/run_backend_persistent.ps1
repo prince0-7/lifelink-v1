@@ -13,7 +13,7 @@ $Python = if (Test-Path ".venv\Scripts\python.exe") { ".venv\Scripts\python.exe"
 
 # Check if MongoDB is running
 Write-Host "`nChecking MongoDB connection..." -ForegroundColor Yellow
-& $Python -c "from test_backend import test_mongodb; import asyncio; raise SystemExit(0 if asyncio.run(test_mongodb()) else 1)" 2>$null
+& $Python -c "from test_backend import check_mongodb; import asyncio; raise SystemExit(0 if asyncio.run(check_mongodb()) else 1)" 2>$null
 if ($LASTEXITCODE -ne 0) {
     Write-Host "MongoDB is not running! Please start MongoDB first." -ForegroundColor Red
     Write-Host "You can start MongoDB with: mongod" -ForegroundColor Yellow

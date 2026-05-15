@@ -3,6 +3,8 @@ Authentication service with JWT and OAuth support
 """
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from models import User
@@ -21,6 +23,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 # OAuth setup
 config = Config('.env')
@@ -218,3 +221,15 @@ class AuthService:
 
 # Create auth service instance
 auth_service = AuthService()
+
+
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+    """FastAPI dependency that resolves the current user from a bearer token."""
+    user = await auth_service.get_user_from_token(token)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return user

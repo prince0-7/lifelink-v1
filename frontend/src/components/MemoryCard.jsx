@@ -1,6 +1,14 @@
 import React from 'react';
 
 function MemoryCard({ memory, date, tag, mood, image, aiReaction, onDelete }) {
+  const memoryData = typeof memory === 'object' && memory !== null ? memory : null;
+  const memoryText = memoryData ? memoryData.text : memory;
+  const memoryDate = date || memoryData?.date;
+  const memoryTag = tag || memoryData?.tag || memoryData?.mood;
+  const memoryMood = mood || memoryData?.detected_mood || memoryData?.mood;
+  const memoryImage = image || memoryData?.image || memoryData?.image_url;
+  const memoryAiReaction = aiReaction || memoryData?.ai_response;
+
   // Optional: auto-emoji for mood
   const getMoodEmoji = (moodText) => {
     if (!moodText) return '';
@@ -14,7 +22,7 @@ function MemoryCard({ memory, date, tag, mood, image, aiReaction, onDelete }) {
     return "🧠";
   };
 
-  const displayMood = mood || tag || 'Not detected';
+  const displayMood = memoryMood || memoryTag || 'Not detected';
 
   return (
     <div
@@ -28,15 +36,15 @@ function MemoryCard({ memory, date, tag, mood, image, aiReaction, onDelete }) {
         boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
       }}
     >
-      <p>{memory}</p>
+      <p>{memoryText}</p>
 
       <p style={{ marginTop: 8 }}>
         <strong>Mood:</strong> {getMoodEmoji(displayMood)} {displayMood}
       </p>
 
-      {image && (
+      {memoryImage && (
         <img
-          src={image}
+          src={memoryImage}
           alt="memory"
           style={{
             width: '100%',
@@ -48,7 +56,7 @@ function MemoryCard({ memory, date, tag, mood, image, aiReaction, onDelete }) {
         />
       )}
 
-      {aiReaction && (
+      {memoryAiReaction && (
         <div style={{
           marginTop: 12,
           padding: 12,
@@ -57,16 +65,16 @@ function MemoryCard({ memory, date, tag, mood, image, aiReaction, onDelete }) {
           borderLeft: '3px solid #3b82f6'
         }}>
           <strong style={{ color: '#3b82f6' }}>🤖 AI Response:</strong>
-          <p style={{ marginTop: 4, marginBottom: 0 }}>{aiReaction}</p>
+          <p style={{ marginTop: 4, marginBottom: 0 }}>{memoryAiReaction}</p>
         </div>
       )}
 
-      <em style={{ color: '#888' }}>Date: {date}</em>
+      <em style={{ color: '#888' }}>Date: {memoryDate}</em>
 
       {onDelete && (
         <div>
           <button
-            onClick={onDelete}
+            onClick={() => onDelete(memoryData?.id)}
             style={{
               marginTop: 10,
               padding: '6px 12px',

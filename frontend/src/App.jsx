@@ -127,10 +127,6 @@ function App() {
 
     setAIGenerating(true);
 
-    const today = new Date();
-    const dateOnly = today.toISOString().split('T')[0];
-    
-    let detectedMood = 'Neutral';
     let enhancedReaction = 'Thank you for sharing this memory! ✨';
 
     // Use AI Manager for mood detection and response generation
@@ -138,9 +134,9 @@ function App() {
       try {
         // Get sentiment analysis
         const sentiment = await aiManager.analyzeSentimentLocal(memory);
-        detectedMood = sentiment.mood === 'positive' ? 'Happy' : 
-                     sentiment.mood === 'negative' ? 'Sad' : 
-                     sentiment.mood === 'calm' ? 'Calm' : 'Neutral';
+        const detectedMood = sentiment.mood === 'positive' ? 'Happy' : 
+                           sentiment.mood === 'negative' ? 'Sad' : 
+                           sentiment.mood === 'calm' ? 'Calm' : 'Neutral';
 
         // Generate AI response
         const aiResponse = await aiManager.generateResponse(memory, {
@@ -151,7 +147,7 @@ function App() {
 
         if (aiResponse) {
           enhancedReaction = aiResponse.response;
-          setAIStatus({ source: aiResponse.source, cost: aiResponse.cost });
+          setAIStatus({ source: aiResponse.source, cost: aiResponse.cost, detectedMood });
         }
       } catch (error) {
         console.error('AI processing error:', error);

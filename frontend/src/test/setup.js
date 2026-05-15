@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom'
 import { cleanup } from '@testing-library/react'
-import { afterEach } from 'vitest'
+import { afterEach, vi } from 'vitest'
 
 // Cleanup after each test case
 afterEach(() => {
@@ -8,7 +8,7 @@ afterEach(() => {
 })
 
 // Mock window.speechSynthesis
-global.speechSynthesis = {
+globalThis.speechSynthesis = {
   speak: vi.fn(),
   cancel: vi.fn(),
   pause: vi.fn(),
@@ -17,7 +17,7 @@ global.speechSynthesis = {
 }
 
 // Mock SpeechSynthesisUtterance
-global.SpeechSynthesisUtterance = vi.fn(() => ({
+globalThis.SpeechSynthesisUtterance = vi.fn(() => ({
   text: '',
   lang: '',
   voice: null,
@@ -27,7 +27,7 @@ global.SpeechSynthesisUtterance = vi.fn(() => ({
 }))
 
 // Mock SpeechRecognition
-global.SpeechRecognition = global.webkitSpeechRecognition = vi.fn(() => ({
+globalThis.SpeechRecognition = globalThis.webkitSpeechRecognition = vi.fn(() => ({
   continuous: false,
   interimResults: false,
   lang: '',

@@ -9,10 +9,11 @@ Set-Location $PSScriptRoot
 
 # Set Python path
 $env:PYTHONPATH = "$PWD;$env:PYTHONPATH"
+$Python = if (Test-Path ".venv\Scripts\python.exe") { ".venv\Scripts\python.exe" } else { "python" }
 
 # Check if MongoDB is running
 Write-Host "`nChecking MongoDB connection..." -ForegroundColor Yellow
-python -c "from motor.motor_asyncio import AsyncIOMotorClient; import asyncio; async def test(): client = AsyncIOMotorClient('mongodb://localhost:27017'); await client.server_info(); print('MongoDB is connected!'); asyncio.run(test())" 2>$null
+& $Python -c "from test_backend import test_mongodb; import asyncio; raise SystemExit(0 if asyncio.run(test_mongodb()) else 1)" 2>$null
 if ($LASTEXITCODE -ne 0) {
     Write-Host "MongoDB is not running! Please start MongoDB first." -ForegroundColor Red
     Write-Host "You can start MongoDB with: mongod" -ForegroundColor Yellow
@@ -22,7 +23,7 @@ if ($LASTEXITCODE -ne 0) {
 # Kill any existing backend processes
 Write-Host "`nChecking for existing backend processes..." -ForegroundColor Yellow
 $existingProcesses = Get-Process python -ErrorAction SilentlyContinue | Where-Object {
-    $_.CommandLine -like "*uvicorn*" -or $_.CommandLine -like "*main:app*"
+    $_.CommandLine -like "*uvicorn*" -or $_.CommandLine -like "*main:*"
 }
 if ($existingProcesses) {
     Write-Host "Found existing backend processes. Stopping them..." -ForegroundColor Yellow
@@ -37,4 +38,4 @@ Write-Host "API Documentation: http://localhost:8000/docs" -ForegroundColor Cyan
 Write-Host "`nPress Ctrl+C to stop the server" -ForegroundColor Yellow
 
 # Run uvicorn directly (not in background)
-python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+& $Python -m uvicorn main:socket_app --reload --host 0.0.0.0 --port 8000

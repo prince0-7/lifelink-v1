@@ -1,10 +1,8 @@
 """
 Vector database service for semantic search
 """
-import pinecone
 from typing import List, Dict, Any, Optional
 import numpy as np
-from sentence_transformers import SentenceTransformer
 import logging
 import os
 from datetime import datetime
@@ -26,6 +24,9 @@ class VectorService:
     def _initialize(self):
         """Initialize Pinecone and embedding model"""
         try:
+            import pinecone
+            from sentence_transformers import SentenceTransformer
+
             # Initialize Pinecone
             pinecone.init(
                 api_key=os.getenv("PINECONE_API_KEY"),
@@ -58,6 +59,8 @@ class VectorService:
     async def generate_embeddings(self, text: str) -> List[float]:
         """Generate embeddings for text"""
         try:
+            if self.model is None:
+                return []
             loop = asyncio.get_event_loop()
             embeddings = await loop.run_in_executor(
                 self.executor,
@@ -72,6 +75,8 @@ class VectorService:
     async def index_memory(self, memory: Any) -> bool:
         """Index a memory in the vector database"""
         try:
+            if self.index is None:
+                return False
             # Generate embeddings if not present
             if not memory.embeddings:
                 memory.embeddings = await self.generate_embeddings(memory.text)
@@ -110,6 +115,8 @@ class VectorService:
     ) -> List[Dict[str, Any]]:
         """Search for similar memories"""
         try:
+            if self.index is None:
+                return []
             # Build filter
             query_filter = {}
             if user_id:
@@ -202,6 +209,8 @@ class VectorService:
     async def delete_memory_embedding(self, memory_id: str) -> bool:
         """Delete a memory from the vector database"""
         try:
+            if self.index is None:
+                return False
             self.index.delete(ids=[memory_id])
             logger.info(f"Deleted memory {memory_id} from vector database")
             return True

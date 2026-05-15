@@ -5,9 +5,8 @@ from beanie import init_beanie
 from config import settings
 from models import Memory, MemoryInsight, MemoryCreate, MemoryUpdate, MemoryResponse, SearchQuery, AIResponse, AnalysisResponse, User, MemoryRelationship, MemoryCluster, UserSubscription, SharedMemoryAccess, AnalyticsEvent
 from services.ai_service_simple import ai_service
-from services.websocket_manager import sio, ws_manager
+from services.websocket_manager import connected_users, sio, ws_manager
 from services.vector_service import vector_service
-from graphql import create_graphql_router
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 import logging
@@ -16,12 +15,25 @@ import os
 import aiofiles
 from pathlib import Path
 import socketio
-from tasks.ai_tasks import generate_memory_embeddings, analyze_memory_sentiment
 from routers import auth, graph, analytics
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+class _OptionalTask:
+    def __init__(self, name: str):
+        self.name = name
+
+    def delay(self, *args, **kwargs):
+        logger.info("Background task %s skipped; task worker dependencies are unavailable.", self.name)
+
+try:
+    from tasks.ai_tasks import generate_memory_embeddings, analyze_memory_sentiment
+except Exception as exc:
+    logger.warning("Background tasks unavailable: %s", exc)
+    generate_memory_embeddings = _OptionalTask("generate_memory_embeddings")
+    analyze_memory_sentiment = _OptionalTask("analyze_memory_sentiment")
 
 # Create FastAPI app
 app = FastAPI(title="Lifelink API", version="2.0")
@@ -42,6 +54,18 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+# Add routers before startup so they are available immediately and documented.
+try:
+    from graphql import create_graphql_router
+
+    graphql_router = create_graphql_router()
+    app.include_router(graphql_router, prefix="/graphql")
+except Exception as exc:
+    logger.warning("GraphQL endpoint disabled: %s", exc)
+app.include_router(auth.router, prefix="/api", tags=["auth"])
+app.include_router(graph.router, prefix="/api/graph", tags=["graph"])
+app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
+
 @app.on_event("startup")
 async def startup_event():
     # Initialize Beanie with all document models
@@ -61,15 +85,6 @@ async def startup_event():
         logger.info("AI service is available")
     else:
         logger.warning("AI service is not available - will use fallback responses")
-    
-    # Add GraphQL endpoint
-    graphql_router = create_graphql_router()
-    app.include_router(graphql_router, prefix="/graphql")
-    
-    # Add routers
-    app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
-    app.include_router(graph.router, prefix="/api/graph", tags=["graph"])
-    app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 
 @app.on_event("shutdown")
 async def shutdown_event():
@@ -225,7 +240,7 @@ async def health_check():
         "version": "2.0",
         "ai_available": ai_service.local_ai_available,
         "vector_db": vector_stats,
-        "websocket_clients": len(ws_manager.connected_users)
+        "websocket_clients": len(connected_users)
     }
 
 # Run the application

@@ -1,11 +1,6 @@
 from typing import List, Dict, Tuple, Optional
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
-from sentence_transformers import SentenceTransformer
-import spacy
 from datetime import datetime, timedelta
-import networkx as nx
-from networkx.algorithms import community
 import asyncio
 from models import Memory, MemoryRelationship, MemoryCluster
 import logging
@@ -14,8 +9,24 @@ logger = logging.getLogger(__name__)
 
 class RelationshipService:
     def __init__(self):
-        self.encoder = SentenceTransformer('all-MiniLM-L6-v2')
-        self.nlp = spacy.load('en_core_web_sm')
+        self.encoder = None
+        self.nlp = None
+
+    def _ensure_encoder(self):
+        if self.encoder is None:
+            from sentence_transformers import SentenceTransformer
+            self.encoder = SentenceTransformer('all-MiniLM-L6-v2')
+        return self.encoder
+
+    def _ensure_nlp(self):
+        if self.nlp is None:
+            import spacy
+            try:
+                self.nlp = spacy.load('en_core_web_sm')
+            except OSError:
+                self.nlp = spacy.blank('en')
+                logger.warning("spaCy model en_core_web_sm is not installed; using a blank English pipeline.")
+        return self.nlp
         
     async def find_relationships(self, memories: List[Memory], user_id: str) -> List[Dict]:
         """Find relationships between memories based on multiple factors"""
@@ -25,8 +36,10 @@ class RelationshipService:
         relationships = []
         
         # Generate embeddings for all memories
+        from sklearn.metrics.pairwise import cosine_similarity
+        encoder = self._ensure_encoder()
         texts = [m.text for m in memories]
-        embeddings = self.encoder.encode(texts)
+        embeddings = encoder.encode(texts)
         
         # Calculate similarity matrix
         similarity_matrix = cosine_similarity(embeddings)
@@ -113,7 +126,7 @@ class RelationshipService:
     def _extract_entities(self, text: str) -> set:
         """Extract named entities from text"""
         try:
-            doc = self.nlp(text)
+            doc = self._ensure_nlp()(text)
             entities = {ent.text.lower() for ent in doc.ents}
             # Also extract important nouns
             entities.update({
@@ -146,6 +159,9 @@ class RelationshipService:
             return []
         
         # Build network graph
+        import networkx as nx
+        from networkx.algorithms import community
+
         G = nx.Graph()
         
         # Add nodes
@@ -197,7 +213,7 @@ class RelationshipService:
         
         # Extract keywords from all memories
         all_text = " ".join([m.text for m in memories])
-        doc = self.nlp(all_text)
+        doc = self._ensure_nlp()(all_text)
         
         # Get most common entities and keywords
         keywords = []
@@ -270,6 +286,8 @@ class RelationshipService:
         ).to_list()
         
         # Build graph
+        import networkx as nx
+
         G = nx.Graph()
         for rel in relationships:
             G.add_edge(

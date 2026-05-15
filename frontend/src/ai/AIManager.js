@@ -35,7 +35,7 @@ class AIManager {
         console.log('🚀 Local AI (Ollama) is available!');
         return true;
       }
-    } catch (error) {
+    } catch {
       console.log('⚠️ Local AI not available, will use cloud fallback');
       this.localAIAvailable = false;
     }
@@ -67,8 +67,6 @@ class AIManager {
 
   // MAIN AI ROUTING FUNCTION
   async generateResponse(prompt, context = {}) {
-    const { type = 'conversation', memories = [], urgency = 'normal' } = context;
-    
     try {
       // Try local AI first if preferred and available
       if (this.shouldUseLocal()) {
@@ -84,7 +82,7 @@ class AIManager {
 
       // Final fallback to enhanced local processing
       return { 
-        response: this.generateEnhancedLocalResponse(prompt, context), 
+        response: await this.generateEnhancedLocalResponse(prompt, context), 
         source: 'enhanced-local', 
         cost: 0 
       };
@@ -142,9 +140,6 @@ class AIManager {
   async generateCloudResponse(prompt, context) {
     try {
       // Using Google Gemini free tier
-      const apiKey = this.userPreferences.premiumAPIKey || 'free-tier';
-      const systemPrompt = this.buildSystemPrompt(context);
-      
       // If user has premium API key, use it
       if (this.userPreferences.premiumAPIKey) {
         return await this.generatePremiumResponse(prompt, context);
@@ -253,8 +248,8 @@ class AIManager {
   }
 
   // ENHANCED LOCAL PROCESSING (NO INTERNET NEEDED)
-  generateEnhancedLocalResponse(prompt, context) {
-    const sentiment = this.analyzeSentimentLocal(prompt);
+  async generateEnhancedLocalResponse(prompt, context) {
+    const sentiment = await this.analyzeSentimentLocal(prompt);
     const { memories = [] } = context;
     
     // Analyze user's memory patterns
@@ -351,7 +346,7 @@ Guidelines:
     return systemPrompt;
   }
 
-  generateFallbackResponse(prompt, context) {
+  generateFallbackResponse(_prompt, _context) {
     const fallbacks = [
       "Thank you for sharing this memory with me. Your experiences matter and I'm honored to be part of your journey. ✨",
       "I appreciate you taking the time to record this moment. Each memory is a precious piece of your unique story. 🧠",
@@ -363,7 +358,7 @@ Guidelines:
   }
 
   // PREMIUM AI FEATURES (IF USER ADDS API KEY)
-  async generatePremiumResponse(prompt, context) {
+  async generatePremiumResponse(_prompt, _context) {
     // This would integrate with OpenAI/Claude if user provides API key
     console.log('Premium AI features would go here');
     return null;

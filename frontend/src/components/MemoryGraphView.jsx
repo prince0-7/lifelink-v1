@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import MemoryGraph from './MemoryGraph';
 import { getMemoryGraph, analyzeRelationships, detectClusters } from '../services/api';
 
@@ -11,11 +11,7 @@ const MemoryGraphView = () => {
   const [selectedMemory, setSelectedMemory] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
 
-  useEffect(() => {
-    loadGraphData();
-  }, [timeRange, minStrength]);
-
-  const loadGraphData = async () => {
+  const loadGraphData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -27,7 +23,11 @@ const MemoryGraphView = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeRange, minStrength]);
+
+  useEffect(() => {
+    loadGraphData();
+  }, [loadGraphData]);
 
   const handleAnalyzeRelationships = async () => {
     setAnalyzing(true);
